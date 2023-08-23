@@ -1,12 +1,34 @@
 const express = require('express');
-const path = require('path');
-
+// const path = require('path');
+// const rootDir = require('../util/path');
 const router = express.Router();
+// const adminData = require('./admin.js');
+const shopsController = require('../controllers/shop');
 
-router.get('/',(req,res,next)=>{
-    res.sendFile(path.join(__dirname,'../','views','shop.html'));
-    // console.log('Hello from shop module');
-    // res.send('<h1>Hello from express!</h1>');
-});
+//
+router.get('/',shopsController.getIndex);
+
+//
+router.get('/products',shopsController.getProducts);
+
+//
+router.get('/products/:id',shopsController.getProduct);
+
+//
+router.get('/orders',shopsController.getOrders);
+
+//
+router.get('/cart',shopsController.getCart);
+
+//
+router.post('/cart',shopsController.postCart);
+
+//
+router.get('/checkout',shopsController.getCheckout);
+
+//
+router.post('/cart-delete-item',shopsController.deleteProductFromCart);
+
+
 // module.exports = path.dirname(require.main.filename);
 module.exports = router;

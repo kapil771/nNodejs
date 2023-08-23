@@ -1,19 +1,28 @@
+const path = require('path');
+
 const express = require('express');
 const bodyParse = require('body-parser');
-const path = require('path');
+// const expressHbs = require('express-handlebars');
+const errorController = require('./controllers/error');
+
 const app = express();
+
+// app.engine('hbs',expressHbs({layoutsDir:'views/layouts/', defaultLayout:'main-layout', extname:'hbs'}));
+app.set('view engine','ejs');
+app.set('views','views');
 
 const adminRoutes = require('./routes/admin.js');
 const shopRoutes = require('./routes/shop.js');
 
 app.use(bodyParse.urlencoded({extended:false}));
 
+// specify static files path
+app.use(express.static(path.join(__dirname,'public')));
+
+// import routes
 app.use(shopRoutes);
 app.use('/admin',adminRoutes);
 
-app.use((req,res,next)=>{
-    res.sendFile(path.join(__dirname,'views','404.html'))
-    // res.status(404).send('<h1>Page not found</h1>');
-})
+app.use(errorController.get404);
 
 app.listen(4000)
