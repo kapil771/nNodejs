@@ -4,7 +4,7 @@ const express = require('express');
 const bodyParse = require('body-parser');
 // const expressHbs = require('express-handlebars');
 const errorController = require('./controllers/error');
-
+const db = require('./util/database')
 const app = express();
 
 // app.engine('hbs',expressHbs({layoutsDir:'views/layouts/', defaultLayout:'main-layout', extname:'hbs'}));
@@ -13,6 +13,14 @@ app.set('views','views');
 
 const adminRoutes = require('./routes/admin.js');
 const shopRoutes = require('./routes/shop.js');
+
+// db.execute('SELECT * FROM products')
+// .then(result=>{
+//     console.log('result::',result);
+// })
+// .catch(err=>{
+//     console.log('err::',err);
+// });
 
 app.use(bodyParse.urlencoded({extended:false}));
 

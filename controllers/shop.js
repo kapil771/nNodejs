@@ -3,17 +3,28 @@ const Product = require('../models/product');
 const Cart = require('../models/cart');
 
 const getProducts = (req,res,next) => {
+
+    Product.getAllProducts()
+        .then(([rows, fieldData])=>{
+            res.render('shop/product-list',{
+                products:rows, 
+                pageTitle:'All Products', 
+                path:'/products'
+            });
+        })
+        .catch(err => console.log(err));
+
     // const products = adminData.products;
-    Product.getAllProducts(products=>{
-        res.render('shop/product-list',{
-            products:products, 
-            pageTitle:'All Products', 
-            path:'/products',
-            hasProducts:products.length>0,
-            activeShop:true,
-            productCSS:true
-        });
-    });
+    // Product.getAllProducts(products=>{
+    //     res.render('shop/product-list',{
+    //         products:products, 
+    //         pageTitle:'All Products', 
+    //         path:'/products',
+    //         hasProducts:products.length>0,
+    //         activeShop:true,
+    //         productCSS:true
+    //     });
+    // });
 
     // console.log('products::',products);
     // res.render('shop',{
@@ -32,26 +43,47 @@ const getProducts = (req,res,next) => {
 
 const getProduct = (req,res,next)=>{
     const id = req.params.id;
-    Product.getProductById(id, product => {
-        res.render('shop/product-detail',{
-            product:product, 
-            pageTitle:product.title, 
-            path:'/products',
-        });
-    });
+    Product.getProductById(id)
+            .then(([product])=>{
+                console.log('product:::',product);
+                res.render('shop/product-detail',{
+                    product:product[0], 
+                    pageTitle:product[0].title, 
+                    path:'/products',
+                });
+            })
+            .catch(err=>console.log(err))
+    // Product.getProductById(id, product => {
+    //     res.render('shop/product-detail',{
+    //         product:product, 
+    //         pageTitle:product.title, 
+    //         path:'/products',
+    //     });
+    // });
 }
 
 const getIndex = (req,res,next) => {
-    Product.getAllProducts(products=>{
-        res.render('shop/index',{
-            products:products, 
-            pageTitle:'Shop', 
-            path:'/',
-            hasProducts:products.length>0,
-            activeShop:true,
-            productCSS:true
-        });
-    });
+
+    Product.getAllProducts()
+        .then(([rows, fieldData])=>{
+            res.render('shop/index',{
+                products:rows, 
+                pageTitle:'Shop', 
+                path:'/'
+            });
+        })
+        .catch(err => console.log(err));
+
+    // Product.getAllProducts(products=>{
+    //     res.render('shop/index',{
+    //         products:products, 
+    //         pageTitle:'Shop', 
+    //         path:'/',
+    //         hasProducts:products.length>0,
+    //         activeShop:true,
+    //         productCSS:true
+    //     });
+    // });
 }
 
 const getCart = (req,res,next)=>{

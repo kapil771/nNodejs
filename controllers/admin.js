@@ -20,11 +20,16 @@ const addProductPost = (req,res,next)=>{
     const description = req.body.description;
     const price = req.body.price;
     const productModel = new Product(null,title,imageUrl,description,price);
-    productModel.save();
+    productModel
+        .save()
+        .then(()=>{
+            res.redirect('/');
+        })
+        .catch(err => console.log(err));
     // console.log('POST');
     // products.push({'title':req.body.title});
     // console.log(req.body);
-    res.redirect('/admin/products');
+    return res.redirect('/admin/products');
 };
 
 const editProduct = (req,res) => {
