@@ -8,6 +8,11 @@ const sequelize = require('./util/database')
 
 const Product = require('./models/product');
 const User = require('./models/user');
+const Cart = require('./models/cart');
+const CartItem = require('./models/cart-item');
+const Order = require('./models/order');
+const OrderItem = require('./models/order-item');
+
 
 const app = express();
 
@@ -47,15 +52,23 @@ app.use('/admin',adminRoutes);
 
 app.use(errorController.get404);
 
+// Associations
 Product.belongsTo(User,{
     constraints:true, 
     onDelete:'CASCADE'
 });
-
 User.hasMany(Product);
+User.hasOne(Cart);
+Cart.belongsTo(User);
+Cart.belongsToMany(Product,{through: CartItem});
+Product.belongsToMany(Cart,{through: CartItem});
+Order.belongsTo(User);
+User.hasMany(Order);
+Order.belongsToMany(Product,{through:OrderItem});
 
 sequelize
-    .sync({ force:true })
+    // .sync({ force:true })
+    .sync()
     .then(result=>{
         return User.findByPk(1);
         // console.log(result);
@@ -68,8 +81,11 @@ sequelize
         return user;
     })
     .then(user=>{
-        console.log(user);
-        app.listen(3000);
+        return user.createCart();
+        // console.log(user);
+    })
+    .then(cart=>{
+        app.listen(3000)
     })
     .catch(err=>{
         console.log(err);      
