@@ -45,17 +45,28 @@ const getProducts = (req,res,next) => {
 const getProduct = (req,res,next)=>{
     const id = req.params.id;
 
-    Product.findAll({where:{id:id}})
-            .then(products=>{
+    Product.findById(id)
+            .then(product=>{
                 res.render('shop/product-detail',{
-                    product:products[0], 
-                    pageTitle:products[0].title, 
-                    path:'/products',
-                });
+                    product:product,
+                    pageTitle:product.title,
+                    path:'/products'
+                })
             })
-            .catch(err=>{
-                console.log(err);
-            })
+            .catch(err=>console.log(err));
+
+    //
+    // Product.findAll({where:{id:id}})
+    //         .then(products=>{
+    //             res.render('shop/product-detail',{
+    //                 product:products[0], 
+    //                 pageTitle:products[0].title, 
+    //                 path:'/products',
+    //             });
+    //         })
+    //         .catch(err=>{
+    //             console.log(err);
+    //         })
 
     //findByPk
     /*Product.findByPk(id)
