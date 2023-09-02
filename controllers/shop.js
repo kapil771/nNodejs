@@ -147,18 +147,19 @@ const getCart = (req,res,next)=>{
     // console.log(req.user.cart);
     req.user
         .getCart()
-        .then(cart=>{
-            return cart
-                .getProducts()
+        // .then(cart=>{
+        //     return cart
+        //         .getProducts()
                 .then(products=>{
+                    console.log('products::::',products);
                     res.render('shop/cart',{
                         path:'/cart/',
                         pageTitle: 'Your Cart',
                         products:products
                     })
                 })
-                .catch(err=>console.log(err));
-            })
+            //     .catch(err=>console.log(err));
+            // })
             .catch(err=>console.log(err));
 
     // Dummy Json File
@@ -191,6 +192,7 @@ const postCart = (req,res,next)=>{
                 return req.user.addToCart(product);
             }).then(result=>{
                 console.log(result);
+                res.redirect('/cart');
             })
 }
 
@@ -235,25 +237,27 @@ const postCart = (req,res,next)=>{
 
 const postOrder = (req,res,next)=>{
     let fetchedCart;
-    req.user.getCart()
-            .then(cart=>{
-                fetchedCart = cart;
-                return cart.getProducts();
-            })
-            .then(products=>{
-                return req.user
-                    .createOrder()
-                    .then(order=>{
-                        order.addProducts(products.map(product=>{
-                            product.orderItem = {quantity:product.cartItem.quantity};
-                            return product;
-                        }))
-                    })
-                    .catch(err=>console.log(err));
-            })
-            .then(result=>{
-                return fetchedCart.setProducts(null);
-            })
+    req.user
+        .addOrder()
+    // .getCart()
+    //         .then(cart=>{
+    //             fetchedCart = cart;
+    //             return cart.getProducts();
+    //         })
+    //         .then(products=>{
+    //             return req.user
+    //                 .createOrder()
+    //                 .then(order=>{
+    //                     order.addProducts(products.map(product=>{
+    //                         product.orderItem = {quantity:product.cartItem.quantity};
+    //                         return product;
+    //                     }))
+    //                 })
+    //                 .catch(err=>console.log(err));
+    //         })
+    //         .then(result=>{
+    //             return fetchedCart.setProducts(null);
+    //         })
             .then(result=>{
                 res.redirect('/orders');
             })
@@ -262,9 +266,9 @@ const postOrder = (req,res,next)=>{
 
 const getOrders = (req,res,next)=>{
     req.user
-        .getOrders({include:['products']})
+        .getOrders()
         .then(orders=>{
-            // console.log('orders::',orders);
+            console.log('orders::',orders[0].items);
             res.render('shop/orders',{
                 path: '/orders',
                 pageTitle:'Your Orders',
@@ -281,21 +285,25 @@ const getOrders = (req,res,next)=>{
 // }
 
 const deleteProductFromCart = (req,res,next)=>{
-    const productId = req.body.id;
-
+    const productId = req.body.productId;
     req.user
-        .getCart()
-        .then(cart=>{
-            return cart.getProducts({where:{id:productId}})
-        })
-        .then(products=>{
-           const product = products[0];
-           return product.cartItem.destroy();
-        })
+        .deleteItemFromCart(productId)
         .then(result=>{
             res.redirect('/cart');
         })
         .catch(err=>console.log(err));
+        // .getCart()
+        // .then(cart=>{
+        //     return cart.getProducts({where:{id:productId}})
+        // })
+        // .then(products=>{
+        //    const product = products[0];
+        //    return product.cartItem.destroy();
+        // })
+        // .then(result=>{
+        //     res.redirect('/cart');
+        // })
+        // .catch(err=>console.log(err));
 
     // Product.getProductById(productId, product=>{
     //     Cart.deleteProduct(productId,product.price);
