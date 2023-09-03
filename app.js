@@ -3,38 +3,54 @@ const path = require('path');
 const express = require('express');
 const bodyParse = require('body-parser');
 const mongoose = require('mongoose');
+const session = require('express-session');
+const MongoDBStore = require('connect-mongodb-session')(session);
 
 const errorController = require('./controllers/error');
 // const mongoConnect = require('./util/database').mongoConnect;
 const User = require('./models/user');
 
+const MONGODB_URI = 'mongodb+srv://kapilkumar10000:xeMC0hXuQyuHL3ib@cluster0.cqe5tgy.mongodb.net/shop_db';
 
 const app = express();
+const store = new MongoDBStore({
+    uri:MONGODB_URI,
+    collection:'sessions'
+});
+
 
 app.set('view engine','ejs');
 app.set('views','views');
 
 const adminRoutes = require('./routes/admin.js');
 const shopRoutes = require('./routes/shop.js');
+const authRoutes = require('./routes/auth.js');
 
 app.use(bodyParse.urlencoded({extended:false}));
 
 // specify static files path
 app.use(express.static(path.join(__dirname,'public')));
+app.use(session({
+    secret:'my secret', 
+    resave:false,
+    saveUninitialized: false,
+    store:store
+}));
 
-app.use((req, res, next)=>{
-    User.findById('64f30ce33afd4bc648ff19a5')
-        .then(user=>{
-            req.user = user;
-            next();
-        })
-        .catch(err=>console.log(err));
-});
+// app.use((req, res, next)=>{
+//     User.findById('64f30ce33afd4bc648ff19a5')
+//         .then(user=>{
+//             req.user = user;
+//             next();
+//         })
+//         .catch(err=>console.log(err));
+// });
 
 
 // import routes
-app.use(shopRoutes);
 app.use('/admin',adminRoutes);
+app.use(shopRoutes);
+app.use(authRoutes);
 
 app.use(errorController.get404);
 
@@ -44,7 +60,7 @@ app.use(errorController.get404);
 
 mongoose
     .connect(
-        'mongodb+srv://kapilkumar10000:xeMC0hXuQyuHL3ib@cluster0.cqe5tgy.mongodb.net/shop_db?retryWrites=true&w=majority'
+        MONGODB_URI
     )
     .then(result=>{
         User.findOne()

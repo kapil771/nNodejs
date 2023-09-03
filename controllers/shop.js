@@ -10,36 +10,11 @@ const getProducts = (req,res,next) => {
             res.render('shop/product-list',{
                 products:products, 
                 pageTitle:'All Products', 
-                path:'/products'
+                path:'/products',
+                isAuthenticated:req.session.isLoggedIn
             });
         })
         .catch(err => console.log(err));
-
-    // const products = adminData.products;
-    // Product.getAllProducts(products=>{
-    //     res.render('shop/product-list',{
-    //         products:products, 
-    //         pageTitle:'All Products', 
-    //         path:'/products',
-    //         hasProducts:products.length>0,
-    //         activeShop:true,
-    //         productCSS:true
-    //     });
-    // });
-
-    // console.log('products::',products);
-    // res.render('shop',{
-    //     products:products, 
-    //     pageTitle:'Shop', 
-    //     path:'/',
-    //     hasProducts:products.length,
-    //     activeShop:true,
-    //     productCSS:true
-    // });
-    // console.log('adminData.products::::::::::::',adminData.products);
-    // res.sendFile(path.join(rootDir,'views','shop.html'));
-    // // console.log('Hello from shop module');
-    // // res.send('<h1>Hello from express!</h1>');
 }
 
 const getProduct = (req,res,next)=>{
@@ -50,58 +25,11 @@ const getProduct = (req,res,next)=>{
                 res.render('shop/product-detail',{
                     product:product,
                     pageTitle:product.title,
-                    path:'/products'
+                    path:'/products',
+                    isAuthenticated:req.session.isLoggedIn
                 })
             })
             .catch(err=>console.log(err));
-
-    //
-    // Product.findAll({where:{id:id}})
-    //         .then(products=>{
-    //             res.render('shop/product-detail',{
-    //                 product:products[0], 
-    //                 pageTitle:products[0].title, 
-    //                 path:'/products',
-    //             });
-    //         })
-    //         .catch(err=>{
-    //             console.log(err);
-    //         })
-
-    //findByPk
-    /*Product.findByPk(id)
-            .then(product=>{
-                res.render('shop/product-detail',{
-                    product:product, 
-                    pageTitle:product.title, 
-                    path:'/products',
-                });
-            })
-            .catch(err=>{
-                console.log(err);
-            }) */
-
-    // Mysql
-    /* Product.getProductById(id)
-            .then(([product])=>{
-                console.log('product:::',product);
-                res.render('shop/product-detail',{
-                    product:product[0], 
-                    pageTitle:product[0].title, 
-                    path:'/products',
-                });
-            })
-            .catch(err=>console.log(err))
-    */
-
-    // Dummy Json        
-    /*Product.getProductById(id, product => {
-        res.render('shop/product-detail',{
-            product:product, 
-            pageTitle:product.title, 
-            path:'/products',
-        });
-    }); */
 }
 
 const getIndex = (req,res,next) => {
@@ -111,39 +39,17 @@ const getIndex = (req,res,next) => {
                 res.render('shop/index',{
                     products:products, 
                     pageTitle:'Shop', 
-                    path:'/'
+                    path:'/',
+                    isAuthenticated:req.session.isLoggedIn
                 });
             })
             .catch(err=>{
                 console.log(err);
             })
-
-    // Mysql
-    /*Product.getAllProducts()
-        .then(([rows, fieldData])=>{
-            res.render('shop/index',{
-                products:rows, 
-                pageTitle:'Shop', 
-                path:'/'
-            });
-        })
-        .catch(err => console.log(err));*/
-
-    // Dummy Data
-    /*Product.getAllProducts(products=>{
-        res.render('shop/index',{
-            products:products, 
-            pageTitle:'Shop', 
-            path:'/',
-            hasProducts:products.length>0,
-            activeShop:true,
-            productCSS:true
-        });
-    }); */
 }
 
 const getCart = (req,res,next)=>{
-    req.user
+    req.session.user
         .populate('cart.items.productId')
         .then(user=>{
             const products = user.cart.items;
@@ -151,7 +57,8 @@ const getCart = (req,res,next)=>{
             res.render('shop/cart',{
                 path:'/cart/',
                 pageTitle: 'Your Cart',
-                products:products
+                products:products,
+                isAuthenticated:req.session.isLoggedIn
             })
         })
         .catch(err=>console.log(err));
@@ -161,7 +68,7 @@ const postCart = (req,res,next)=>{
     const prodId = req.body.productId;
     Product.findById(prodId)
         .then(product => {
-            return req.user.addToCart(product);
+            return req.session.user.addToCart(product);
         }).then(result=>{
             console.log(result);
             res.redirect('/cart');
@@ -208,7 +115,7 @@ const postCart = (req,res,next)=>{
 // }
 
 const postOrder = (req,res,next)=>{
-    req.user
+    req.session.user
         .populate('cart.items.productId')
         .then(user=>{
             const products = user.cart.items.map(i=>{
@@ -219,15 +126,15 @@ const postOrder = (req,res,next)=>{
             });
             const order = new Order({
                 user:{
-                    name:req.user.name,
-                    userId: req.user._id
+                    name:req.session.user.name,
+                    userId: req.session.user._id
                 },
                 products:products
             });
             return order.save();
         })
         .then(()=>{
-            return req.user.clearCart();
+            return req.session.user.clearCart();
         })
         .then(()=>{
             res.redirect('/orders');
@@ -236,14 +143,15 @@ const postOrder = (req,res,next)=>{
 }
 
 const getOrders = (req,res,next)=>{
-    console.log('req.user._id::::',req.user._id);
-    Order.find({"user.userId":req.user._id})
+    console.log('req.session.user._id::::',req.session.user._id);
+    Order.find({"req.session.userId":req.session.user._id})
         .then(orders=>{
             console.log('orders::',orders[0].products);
             res.render('shop/orders',{
                 path: '/orders',
                 pageTitle:'Your Orders',
-                orders:orders
+                orders:orders,
+                isAuthenticated:req.session.isLoggedIn
             });
         });
 }
@@ -257,7 +165,7 @@ const getOrders = (req,res,next)=>{
 
 const deleteProductFromCart = (req,res,next)=>{
     const productId = req.body.productId;
-    req.user
+    req.session.user
         .removeFromCart(productId)
         .then(()=>{
             res.redirect('/cart');

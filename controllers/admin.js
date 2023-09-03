@@ -1,19 +1,22 @@
 const Product = require('../models/product.js');
 
 const addProduct = (req,res) => {
+    console.log('req.session.user::',req.session.user);
     res.render('admin/edit-product',{
         pageTitle:'Add Product',
         path:'/admin/add-product',
-        editing:false
+        editing:false,
+        isAuthenticated:req.session.isLoggedIn
     });
 };
 
 const addProductPost = (req,res,next)=>{
+    console.log('req.session.user::',req.session.user);
     const title = req.body.title;
     const imageUrl = req.body.imageUrl;
     const description = req.body.description;
     const price = req.body.price;
-    const userId = req.user._id;
+    const userId = req.session.user._id;
 
     const product = new Product({
         title:title, 
@@ -51,7 +54,8 @@ const editProduct = (req,res) => {
                     pageTitle:'Edit Product',
                     path:'/admin/edit-product',
                     editing:editMode,
-                    product:product
+                    product:product,
+                    isAuthenticated:req.session.isLoggedIn
                 });
             })
             .catch(err=>console.log(err))
@@ -90,7 +94,8 @@ const getProducts = (req,res,next) => {
             res.render('admin/products',{
                 products:products, 
                 pageTitle:'Admin Products', 
-                path:'/admin/products'
+                path:'/admin/products',
+                isAuthenticated:req.session.isLoggedIn
             });
         })
         .catch(err=>{
