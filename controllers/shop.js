@@ -49,7 +49,7 @@ const getIndex = (req,res,next) => {
 }
 
 const getCart = (req,res,next)=>{
-    req.session.user
+    req.user
         .populate('cart.items.productId')
         .then(user=>{
             const products = user.cart.items;
@@ -68,7 +68,8 @@ const postCart = (req,res,next)=>{
     const prodId = req.body.productId;
     Product.findById(prodId)
         .then(product => {
-            return req.session.user.addToCart(product);
+            console.log('req.user::::',req.user);
+            return req.user.addToCart(product);
         }).then(result=>{
             console.log(result);
             res.redirect('/cart');
@@ -115,7 +116,7 @@ const postCart = (req,res,next)=>{
 // }
 
 const postOrder = (req,res,next)=>{
-    req.session.user
+    req.user
         .populate('cart.items.productId')
         .then(user=>{
             const products = user.cart.items.map(i=>{
@@ -126,15 +127,15 @@ const postOrder = (req,res,next)=>{
             });
             const order = new Order({
                 user:{
-                    name:req.session.user.name,
-                    userId: req.session.user._id
+                    name:req.user.name,
+                    userId: req.user._id
                 },
                 products:products
             });
             return order.save();
         })
         .then(()=>{
-            return req.session.user.clearCart();
+            return req.user.clearCart();
         })
         .then(()=>{
             res.redirect('/orders');
@@ -143,10 +144,10 @@ const postOrder = (req,res,next)=>{
 }
 
 const getOrders = (req,res,next)=>{
-    console.log('req.session.user._id::::',req.session.user._id);
-    Order.find({"req.session.userId":req.session.user._id})
+    console.log('req.user._id::',req.user._id);
+    Order.find({ 'user.userId': req.user._id })
         .then(orders=>{
-            console.log('orders::',orders[0].products);
+            console.log('orders::',orders);
             res.render('shop/orders',{
                 path: '/orders',
                 pageTitle:'Your Orders',
@@ -165,7 +166,7 @@ const getOrders = (req,res,next)=>{
 
 const deleteProductFromCart = (req,res,next)=>{
     const productId = req.body.productId;
-    req.session.user
+    req.user
         .removeFromCart(productId)
         .then(()=>{
             res.redirect('/cart');

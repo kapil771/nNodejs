@@ -1,7 +1,7 @@
 const Product = require('../models/product.js');
 
 const addProduct = (req,res) => {
-    console.log('req.session.user::',req.session.user);
+    console.log('req.user::',req.user);
     res.render('admin/edit-product',{
         pageTitle:'Add Product',
         path:'/admin/add-product',
@@ -11,12 +11,12 @@ const addProduct = (req,res) => {
 };
 
 const addProductPost = (req,res,next)=>{
-    console.log('req.session.user::',req.session.user);
+    console.log('req.user::',req.user);
     const title = req.body.title;
     const imageUrl = req.body.imageUrl;
     const description = req.body.description;
     const price = req.body.price;
-    const userId = req.session.user._id;
+    const userId = req.user._id;
 
     const product = new Product({
         title:title, 
