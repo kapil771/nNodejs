@@ -5,12 +5,17 @@ const bodyParse = require('body-parser');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
+const csrf = require('csurf');
+const flash = require('connect-flash');
+const dotenv = require('dotenv');
 
+
+dotenv.config();
 const errorController = require('./controllers/error');
 // const mongoConnect = require('./util/database').mongoConnect;
 const User = require('./models/user');
 
-const MONGODB_URI = 'mongodb+srv://kapilkumar10000:xeMC0hXuQyuHL3ib@cluster0.cqe5tgy.mongodb.net/shop_db';
+const MONGODB_URI = process.env.MONGODB_URI;
 
 const app = express();
 const store = new MongoDBStore({
@@ -18,6 +23,7 @@ const store = new MongoDBStore({
     collection:'sessions'
 });
 
+const csrfProtection = csrf()
 
 app.set('view engine','ejs');
 app.set('views','views');
@@ -36,7 +42,8 @@ app.use(session({
     saveUninitialized: false,
     store:store
 }));
-
+app.use(csrfProtection)
+app.use(flash());
 
 app.use((req, res, next)=>{
     console.log('req.session.user:::',req.session.user);
@@ -50,6 +57,13 @@ app.use((req, res, next)=>{
         })
         .catch(err=>console.log(err));
 });
+
+
+app.use((req,res,next)=>{
+    res.locals.isAuthenticated = req.session.isLoggedIn;
+    res.locals.csrfToken = req.csrfToken();
+    next();
+})
 
 
 // import routes
@@ -68,21 +82,7 @@ mongoose
         MONGODB_URI
     )
     .then(result=>{
-        User.findOne()
-            .then(user=>{
-                if(!user){
-                    const user = new User({
-                        name:'Kapil',
-                        email:'kaps.logic@gmail.com',
-                        cart:{
-                            items:[]
-                        }
-                    });
-                    user.save();
-                }
-            })
-        
-        app.listen(4000);
+        app.listen(3000);
     })
     .catch(err => {
         console.log(err);

@@ -1,4 +1,6 @@
 const express = require('express');
+const isAuth = require('../middleware/is-auth');
+
 // const path = require('path');
 // const rootDir = require('../util/path');
 const router = express.Router();
@@ -15,22 +17,22 @@ router.get('/products',shopsController.getProducts);
 router.get('/products/:id',shopsController.getProduct);
 
 // // //
-router.post('/create-order',shopsController.postOrder)
+router.post('/create-order', isAuth, shopsController.postOrder)
 
 // // //
-router.get('/orders',shopsController.getOrders);
+router.get('/orders', isAuth, shopsController.getOrders);
 
 // // //
-router.get('/cart',shopsController.getCart);
-
+router.get('/cart', isAuth, shopsController.getCart);
+ 
 // // //
-router.post('/cart',shopsController.postCart);
+router.post('/cart', isAuth, shopsController.postCart);
 
 // // //
 // // // router.get('/checkout',shopsController.getCheckout);
 
 // // //
-router.post('/cart-delete-item',shopsController.deleteProductFromCart);
+router.post('/cart-delete-item', isAuth, shopsController.deleteProductFromCart);
 
 
 // module.exports = path.dirname(require.main.filename);
